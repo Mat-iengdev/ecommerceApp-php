@@ -14,6 +14,13 @@ class Order {
     public $totalPrice;
     public $products = [];
 
+    // Le constructeur est une méthode "magique" car elle est appelée automatiquement
+    // Elle est appelée quand un nouvel objet est crée pour cette classe
+    public function __construct($customerName) {
+        $this->customerName = $customerName;
+        $this->id = uniqid();
+    }
+
     // Fonction addProduct pour ajouter un produit à la commande si elle est en cours (status = "cart")
     // Ajoute un produit "Pringles" et augmente le total de 3
     public function addProduct() {
@@ -35,21 +42,33 @@ class Order {
     // on est en cours de commande "cart", on retire le dernier produit ajouté
     // et du coup on enleve 3 au prix total
     public function removeProduct() {
-        if ($this->status === "cart") {
+        if ($this->status === "cart" && !empty($this->products)) {
             array_pop($this->products);
             $this->totalPrice -= 3;
         }
     }
 }
-
 // Création nouvelle variable $order1 et ajout de produit pour enfin payer
-$order1 = new Order();
+
+$order1 = new Order("Mathis Ieng");
 $order1->addProduct();
 $order1->addProduct();
 $order1->removeProduct();
 $order1->pay();
-// Donc ici on ajoute 2 produits = 2 pringles (6) et on enleve le dernier produit donc
-// On se retrouve avec 1 produit = 1 pringles (3)
+// Dans cet exemple, on ajoute 2 produits (6 € au total), puis on en retire un
+// Résultat final : 1 produit = 3 €
 
+$order2 = new Order("Nathan Julio");
+$order2->addProduct();
+$order2->addProduct();
+$order2->addProduct();
+$order2->addProduct();
+$order1->removeProduct();
+$order1->removeProduct();
+$order2->pay();
 
+echo "<h2>Details de la commande de Mathis Ieng</h2>";
 var_dump($order1);
+
+echo "<h2>Details de la commande de Nathan Julio</h2>";
+var_dump($order2);
