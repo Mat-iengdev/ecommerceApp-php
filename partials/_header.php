@@ -9,17 +9,48 @@
     <style>
         body {
             /* Dégradé linéaire multicolore */
-            background: linear-gradient(135deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff);
+            background-color: indianred;
             background-size: 200% 200%;
-            animation: gradientAnimation 5s ease infinite;
+            font-family: "Toppan Bunkyu Gothic";
+        }
+        .card-container {
+            perspective: 1000px;
+            display: inline-block;
+            margin: 5px;
         }
 
-        /* Animation pour donner un effet de mouvement */
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        .flip-card {
+            width: 200px;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s;
         }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-inner {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transition: transform 1s;
+            transform-style: preserve-3d;
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+        }
+
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+
     </style>
 </head>
 <body>
