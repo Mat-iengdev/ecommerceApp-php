@@ -32,6 +32,17 @@ class Order
         if ($this->status === "cart") {
             $this->products[] = "Pringles";
             $this->totalPrice += 3;
+        } else {
+            throw new Exception("Vous ne pouvez ajouter de produit que lorsque la commande est en cours.");
+        }
+    }
+
+    public function setDeliveryAddress($deliveryAddress) {
+        if ($this->status === "cart") {
+            $this->deliveryAddress = $deliveryAddress;
+            $this->status = "deliveryAddressSet";
+        } else {
+            throw new Exception("Vous ne pouvez définir une adresse de livraison pour cette commande.");
         }
     }
 
@@ -39,8 +50,10 @@ class Order
     // le statut en "paid" si elle est encore en cours
     public function pay()
     {
-        if ($this->status === "cart") {
+        if ($this->status === "cart" && !empty($this->products)) {
             $this->status = "paid";
+        } else {
+            throw new Exception("Vous devez définir une adresse de livraison et ajouter des produits avant de payer.");
         }
     }
 
@@ -52,15 +65,19 @@ class Order
         if ($this->status === "cart" && !empty($this->products)) {
             array_pop($this->products);
             $this->totalPrice -= 3;
+        } else {
+            throw new Exception("Vous ne pouvez retirer des produits que lorsque la commande est en cours et contient des produits.");
         }
     }
 
     //Nouvelle méthode pour envoyer la commande
     public function sendOrder() {
-        if ($this->status === "paid" && !empty($this->products)) {
+        if ($this->status === "paid") {
             // Si la commande à été payer et qu'elle n'est pas vide en produits
             // Elle passe en livraison
             $this->status = "shipped";
+        } else {
+            throw new Exception("La commande doit être payée avant de pouvoir être envoyée.");
         }
     }
 }
@@ -84,7 +101,7 @@ $order1->removeProduct();
 $order2->pay();
 
 // Création d'une commande et test des nouvelles méthodes
-$order3 = new Order("Marine Roulland", "12 Rue de Blahéraut, Eysines 33320");
+$order3 = new Order("Marine Roulland", "4 Avenue du boulebard");
 $order3->addProduct();
 $order3->pay();
 $order3->sendOrder();
