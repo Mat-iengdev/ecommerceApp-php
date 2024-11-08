@@ -12,7 +12,7 @@ class Order
 
     // On initialise la valeur de status à "cart", signifiant que la commande est en cours
     public $status = "cart";
-    public $totalPrice;
+    public $totalPrice = 0;
     public $products = [];
     // On ajoute un nouveau paramètre pour délivrer l'adresse de livraison
     public $deliveryAddress;
@@ -37,6 +37,19 @@ class Order
         }
     }
 
+    // Ici, on crée une fonction qui va permettre de retirer un produit donc si
+    // on est en cours de commande "cart", on retire le dernier produit ajouté
+    // et du coup on enleve 3 au prix total
+    public function removeProduct()
+    {
+        if ($this->status === "cart" && !empty($this->products)) {
+            array_pop($this->products);
+            $this->totalPrice -= 3;
+        } else {
+            throw new Exception("Vous ne pouvez retirer des produits que lorsque la commande est en cours et contient des produits.");
+        }
+    }
+
     public function setDeliveryAddress($deliveryAddress) {
         if ($this->status === "cart") {
             $this->deliveryAddress = $deliveryAddress;
@@ -54,19 +67,6 @@ class Order
             $this->status = "paid";
         } else {
             throw new Exception("Vous devez définir une adresse de livraison et ajouter des produits avant de payer.");
-        }
-    }
-
-    // Ici, on crée une fonction qui va permettre de retirer un produit donc si
-    // on est en cours de commande "cart", on retire le dernier produit ajouté
-    // et du coup on enleve 3 au prix total
-    public function removeProduct()
-    {
-        if ($this->status === "cart" && !empty($this->products)) {
-            array_pop($this->products);
-            $this->totalPrice -= 3;
-        } else {
-            throw new Exception("Vous ne pouvez retirer des produits que lorsque la commande est en cours et contient des produits.");
         }
     }
 
@@ -92,12 +92,13 @@ $order1->pay();
 // Résultat final : 1 produit = 3 €
 
 $order2 = new Order("Nathan Julio", "89 Rue du zoubékoula");
+
 $order2->addProduct();
 $order2->addProduct();
 $order2->addProduct();
 $order2->addProduct();
-$order1->removeProduct();
-$order1->removeProduct();
+$order2->removeProduct();
+$order2->removeProduct();
 $order2->pay();
 
 // Création d'une commande et test des nouvelles méthodes
