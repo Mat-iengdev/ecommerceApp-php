@@ -47,7 +47,8 @@ class VendorMachine
     public function turnOff()
     {
         // Vérifie que l'heure actuelle est après 18h
-        $currentHour = (int)date('H');
+        $currentDateTime = new DateTime();
+        $currentHour = (int)$currentDateTime->format('H');
 
         if ($this->isOn === true && $currentHour >= 18) {
             $this->isOn = false;
