@@ -1,132 +1,112 @@
 <?php
 
-$snacks = [
-    [
-        "name" => "Snickers",
-        "price" => 1,
-        "quantity" => 5
-    ],
-    [
-        "name" => "Mars",
-        "price" => 1.5,
-        "quantity" => 5
-    ],
-    [
-        "name" => "Twix",
-        "price" => 2,
-        "quantity" => 5
-    ],
-    [
-        "name" => "Bounty",
-        "price" => 2.5,
-        "quantity" => 5
-    ]
-];
-
+require_once "./partials/_header.php";
 class VendorMachine
 {
-    // On crée la propriété $isOn pour savoir si la machine est allumée ou non
-    public $isOn = false;
-    // On crée la propriété $snacks qui représente les produits à vendre
-    // De ma machine sous forme de tableau
-    public $snacks = [];
-    // Ici la propriété $cashAmount qui par défaut est de 0
-    // Et Augmentera selon l'achat de nouveau snacks
-    public $cashAmount = 0;
+    public $snacks;
 
-    // On crée une méthode tunrOn(), la machine s'allume si ma propriété isOn retourne vrai
-    public function turnOn()
-    {
+    public $cashAmount;
+
+    public $isOn;
+
+    public function __construct() {
+        $this->isOn = true;
+        $this->cashAmount = 0.00;
+        $this->snacks = [
+            [
+                "name" => "Snickers",
+                "price" => 1,
+                "quantity" => 5
+            ],
+            [
+                "name" => "Mars",
+                "price" => 1.5,
+                "quantity" => 5
+            ],
+            [
+                "name" => "Twix",
+                "price" => 2,
+                "quantity" => 5
+            ],
+            [
+                "name" => "Bounty",
+                "price" => 2.5,
+                "quantity" => 5
+            ]
+        ];
+
+    }
+
+    public function turnOn() {
         $this->isOn = true;
     }
 
-    // On crée une méthode turnOff(), on récupère l'heure actuelle grâce à une propriété
-    // Et on utilise une condition pour que la machine puisse s'éteindre après 18h
-    // On vérifie aussi si la machine est déjà allumée avant de pouvoir l'éteindre
-    // Sinon un message d'erreur apparaît
-    public function turnOff()
-    {
-        // Vérifie que l'heure actuelle est après 18h
-        $currentDateTime = new DateTime();
-        $currentHour = (int)$currentDateTime->format('H');
+    public function turnOff() {
+        $currentDate = new DateTime();
+        $currentHour = $currentDate->format('H');
 
-        if ($this->isOn === true && $currentHour >= 18) {
+        if ($currentHour >= 10) {
             $this->isOn = false;
         } else {
-            throw new Exception("Impossible d'éteindre la machine avant 18h");
+            throw new Exception('Vous ne pouvez pas éteindre la machine avant 18h');
         }
     }
 
-    // Le constructeur initialise la machine avec les snacks
-    public function __construct($snacks)
-    {
-        $this->snacks = $snacks;
-        $this->cashAmount = 0;  // Au départ, il n'y a pas d'argent
-    }
+    public function buySnack($selectedSnack) {
+        if ($this->isOn) {
 
-    // La méthode ici consiste à acheter un snack, on prend en paramètre le nom du snack qu'on
-    // retournera dans la création d'un nouvel objet
-    // On vérifie si la machine est bien allumée avant de procéder a une boucle forEach
-    // qui va parcourir tout les snacks jusqu'à trouver celui correspondant
-    public function buySnack($snackName)
-    {
-        if ($this->isOn === true) {
-            // Vérifier si le snack existe et si la quantité est suffisante
-            foreach ($this->snacks as &$snack) {
-                if ($snack['name'] === $snackName) {
+            // on initialise une variable "flag" à false
+            $snackFound = false;
+
+            foreach ($this->snacks as $index => $snack) {
+                if ($snack['name'] === $selectedSnack) {
+
                     if ($snack['quantity'] > 0) {
-                        // Décrémenter la quantité du snack
-                        $snack['quantity']--;
-                        // Ajouter le prix du snack au cashAmount
                         $this->cashAmount += $snack['price'];
-                        return;  // Sortir de la fonction après un achat réussi
+                        $this->removeSnackQuantity($index);
                     } else {
-                        throw new Exception("Malheuresement le snack est en rupture de stock.");
+                        throw new Exception('snack trouvé mais pas de quantité suffisante');
                     }
+                    // si le snack a été trouvé dans la boucle,
+                    // on modifie la variable "flag"
+                    $snackFound = true;
+                    break;
                 }
+
             }
-        } else {
-            throw new Exception ("Problème, la machine n'est pas allumée");
+            // après la boucle, on regarde la valeur de
+            // la variable flag
+            // et on lance une exception si le snack n'a pas été trouvé
+            if (!$snackFound) {
+                throw new Exception('snack non trouvé');
+            }
+
         }
     }
 
-
-
-
-    // Méthode pour acheter un snack aléatoirement en "shootant du pied"
-    // array_rand ici nous permet de faire une sélection au hasard de clés, ou bien de valeurs
     public function shootWithFoot() {
-        if ($this->isOn === true) {
-            // Sélectionner un snack aléatoire parmi les snacks disponibles
-            $randomSnackIndex = array_rand($this->snacks);  // Sélectionner un snack aléatoire
+        if ($this->isOn) {
+            $randomIndex = rand(0, count($this->snacks) - 1);
+            $randomSnack = $this->snacks[$randomIndex];
 
-            // Vérifier si le snack est encore disponible
-            if ($this->snacks[$randomSnackIndex]['quantity'] > 0) {
-                // Récupérer le prix du snack choisi
-                $snackPrice = $this->snacks[$randomSnackIndex]['price'];
-
-                // Décrémenter la quantité du snack
-                $this->snacks[$randomSnackIndex]['quantity']--;
-
-                // Générer un montant de cash aléatoire à retirer (entre 1 et le cashAmount)
-                $randomCashAmount = mt_rand(1, $this->cashAmount * 100) / 100;
-                echo "{$randomCashAmount}€ sont tombés de la machine";
-                // Vérifier si le cashAmount est suffisant pour cette décrémentation
-                if ($this->cashAmount >= $randomCashAmount) {
-                    $this->cashAmount -= $randomCashAmount;  // Retirer le montant aléatoire du cashAmount
-                } else {
-                    throw new Exception("Il n'y a pas assez d'argent pour compléter cette action.");
-                }
-            } else {
-                throw new Exception("La technique ne peut pas marcher, il n'y a plus assez de stock de snack");
+            if ($randomSnack['quantity'] > 0) {
+                $this->removeSnackQuantity($randomIndex);
             }
-        } else {
-            throw new Exception("La machine est éteinte. Impossible d'effectuer l'action.");
+
+            $randomInsideCash =  rand(0, $this->cashAmount * 100) / 100;
+            $this->cashAmount -= $randomInsideCash;
+            echo "Eh bien joué ! + {$randomInsideCash} € </br>";
         }
     }
+
+    private function removeSnackQuantity($index) {
+        $this->snacks[$index]['quantity'] -= 1;
+    }
+
 }
 
-$machine1 = new VendorMachine($snacks);
+
+$machine1 = new VendorMachine();
 // On allume la machine et on achète un snickers
 // On peut pas éteindre la machine après utilisation car il n'est pas encore 18h
 $machine1->turnOn();
@@ -136,14 +116,14 @@ $machine1->buySnack("Snickers");
 $machine1->buySnack("Snickers");
 $machine1->shootWithFoot();
 
-$machine2 = new VendorMachine($snacks);
+$machine2 = new VendorMachine();
 
 $machine2->turnOn();
 $machine2->buySnack("Mars");
 $machine2->buySnack("Twix");
 $machine2->shootWithFoot();
 
-$machine3 = new VendorMachine($snacks);
+$machine3 = new VendorMachine();
 
 $machine3->turnOn();
 $machine3->buySnack("Bounty");
@@ -152,10 +132,10 @@ $machine3->buySnack("Snickers");
 $machine3->shootWithFoot();
 
 
-echo "<h2>Les fabuleux achats de Nathan</h2>";
+echo "<h2>Les fabuleux achats de Nathan le Dieu cosmique</h2>";
 var_dump($machine1);
-echo "<h2>Les fabuleux achats d'Edouard</h2>";
+echo "<h2>Les fabuleux achats d'Edouard cet enculé avec son deck foudre</h2>";
 var_dump($machine2);
-echo "<h2>Les fabuleux achats de Mathis</h2>";
+echo "<h2>Les fabuleux achats de Dylan ce fumier il représente 50% du CA d'Otéra</h2>";
 var_dump($machine3);
 

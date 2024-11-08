@@ -7,15 +7,15 @@ require_once './partials/_header.php';
 class Order
 {
 
-    public $id;
-    public $customerName;
+    private $id;
+    private $customerName;
 
     // On initialise la valeur de status à "cart", signifiant que la commande est en cours
-    public $status = "cart";
-    public $totalPrice = 0;
-    public $products = [];
+    private $status = "cart";
+    private $totalPrice = 0;
+    private $products = [];
     // On ajoute un nouveau paramètre pour délivrer l'adresse de livraison
-    public $deliveryAddress;
+    private $deliveryAddress;
 
     // Le constructeur est une méthode "magique" car elle est appelée automatiquement
     // Elle est appelée quand un nouvel objet est crée pour cette classe
